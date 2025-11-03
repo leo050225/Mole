@@ -52,11 +52,21 @@ fun MoleScreen(
             .fillMaxSize()
             .onSizeChanged { intSize ->
                 moleViewModel.getArea(intSize, moleSizePx)
-            },
-        contentAlignment = Alignment.Center
+            }
     ) {
-        Text("分數: $counter \n時間: $stay 秒")
+        // 最上方文字
+        Text(
+            text = "資管二A 411312448 施聿觀",
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
 
+        // 分數與時間在中間
+        Text(
+            text = "分數: $counter\n時間: $stay 秒",
+            modifier = Modifier.align(Alignment.Center)
+        )
+
+        // 地鼠圖片
         Image(
             painter = painterResource(id = R.drawable.mole),
             contentDescription = "地鼠",
@@ -71,3 +81,4 @@ fun MoleScreen(
         moleViewModel.startCounting()
     }
 }
+
