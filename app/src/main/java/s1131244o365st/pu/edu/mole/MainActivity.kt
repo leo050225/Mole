@@ -9,23 +9,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import s1131244o365st.pu.edu.mole.ui.theme.MoleTheme
+import s1131244o365st.pu.edu.mole.ui.theme.MoleViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,42 +30,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MoleTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
                 MoleScreen()
             }
         }
     }
 }
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MoleTheme {
-        Greeting("Android")
-    }
-}
-
-@Composable
-fun MoleScreen() {
-    var counter by rememberSaveable() { mutableLongStateOf(0) }
-    Box (
+fun MoleScreen(
+    moleViewModel: MoleViewModel = viewModel()
+) {
+    val counter = moleViewModel.counter
+    val stay = moleViewModel.stay
+    Box(
         modifier = Modifier.fillMaxSize(),
         Alignment.Center
     ) {
-        Text(counter.toString())
+        Text("分數: $counter \n時間: $stay")
     }
 
     Image(
@@ -77,6 +54,8 @@ fun MoleScreen() {
         modifier = Modifier
             .offset { IntOffset(50, 200) }
             .size(150.dp)
-            .clickable { counter++ }
+            .clickable {
+                moleViewModel.incrementCounter()
+            }
     )
 }
