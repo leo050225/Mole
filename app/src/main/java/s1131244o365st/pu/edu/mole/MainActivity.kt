@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -41,10 +41,7 @@ fun MoleScreen(
     moleViewModel: MoleViewModel = viewModel()
 ) {
     val counter = moleViewModel.counter
-    val time = moleViewModel.time
-    val offsetX = moleViewModel.offsetX
-    val offsetY = moleViewModel.offsetY
-    val isGameOver = moleViewModel.isGameOver
+    val stay = moleViewModel.stay
 
     val density = LocalDensity.current
     val moleSizeDp = 150.dp
@@ -53,34 +50,24 @@ fun MoleScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .onGloballyPositioned { layoutCoordinates ->
-                // ✅ 用 onGloballyPositioned 拿實際螢幕像素大小
-                val width = layoutCoordinates.size.width
-                val height = layoutCoordinates.size.height
-                moleViewModel.updateGameArea(width, height, moleSizePx)
+            .onSizeChanged { intSize ->
+                moleViewModel.getArea(intSize, moleSizePx)
             },
         contentAlignment = Alignment.Center
     ) {
-        if (!isGameOver) {
-            Text("分數: $counter\n時間: $time 秒")
+        Text("分數: $counter \n時間: $stay 秒")
 
-            Image(
-                painter = painterResource(id = R.drawable.mole),
-                contentDescription = "地鼠",
-                modifier = Modifier
-                    // ✅ 根據 offset (px) 設定位置
-                    .offset { IntOffset(offsetX, offsetY) }
-                    .size(moleSizeDp)
-                    .clickable {
-                        moleViewModel.incrementCounter()
-                    }
-            )
-        } else {
-            Text("遊戲結束！\n最終分數: $counter")
-        }
+        Image(
+            painter = painterResource(id = R.drawable.mole),
+            contentDescription = "地鼠",
+            modifier = Modifier
+                .offset { IntOffset(moleViewModel.offsetX, moleViewModel.offsetY) }
+                .size(moleSizeDp)
+                .clickable { moleViewModel.incrementCounter() }
+        )
     }
 
     LaunchedEffect(Unit) {
-        moleViewModel.startGame()
+        moleViewModel.startCounting()
     }
 }
