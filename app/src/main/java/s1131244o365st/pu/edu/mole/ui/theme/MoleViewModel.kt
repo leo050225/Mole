@@ -4,38 +4,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
-class MoleViewModel : ViewModel(){
+class MoleViewModel : ViewModel() {
+
     var counter by mutableLongStateOf(0)
-        private set  //表示只有 ViewModel 內部可以修改它
-
-    fun incrementCounter() {
-        counter++
-    }
-
-    var stay by mutableLongStateOf(0)
-        private set // 設定為 private
-    init {
-        // 在 ViewModel 初始化時啟動一個協程來自動增加計數器
-        startCounting()
-    }
-
-    var maxX by mutableStateOf(0)
         private set
 
-    var maxY by mutableStateOf(0)
+    var time by mutableLongStateOf(0)
         private set
 
-    // 根據螢幕寬度,高度及地鼠圖片大小,計算螢幕範圍
-    fun getArea(gameSize: IntSize, moleSize:Int) {
-        maxX = gameSize.width - moleSize
-        maxY = gameSize.height - moleSize
-    }
+    var isGameOver by mutableStateOf(false)
+        private set
 
     var offsetX by mutableStateOf(0)
         private set
@@ -43,20 +27,42 @@ class MoleViewModel : ViewModel(){
     var offsetY by mutableStateOf(0)
         private set
 
-    // 根據螢幕寬度,高度及地鼠圖片大小,隨機移動地鼠不超出螢幕範圍
-    fun moveMole() {
-        offsetX = (0..maxX).random()
-        offsetY = (0..maxY).random()
+    private var screenWidth = 0
+    private var screenHeight = 0
+    private var moleSize = 0
+
+    fun updateGameArea(width: Int, height: Int, moleSizePx: Int) {
+        screenWidth = width
+        screenHeight = height
+        moleSize = moleSizePx
     }
 
-    private fun startCounting() {
+    fun incrementCounter() {
+        if (!isGameOver) counter++
+    }
+
+    fun startGame() {
+        if (isGameOver || screenWidth == 0) return
         viewModelScope.launch {
-            while (true) { // 無限循環，每秒增加一次
+            while (time < 60) {
                 delay(1000L)
-                stay++ // 計數器加 1，這會自動觸發 UI 更新
-                moveMole()
+                time++
+                moveMoleRandomly()
             }
+            isGameOver = true
         }
     }
 
+    private fun moveMoleRandomly() {
+        if (screenWidth > 0 && screenHeight > 0 && moleSize > 0) {
+            val padding = 8  // 避免太貼邊
+            val minX = padding
+            val maxX = (screenWidth - moleSize - padding).coerceAtLeast(minX)
+            val minY = padding
+            val maxY = (screenHeight - moleSize - padding).coerceAtLeast(minY)
+
+            offsetX = Random.nextInt(minX, maxX)
+            offsetY = Random.nextInt(minY, maxY)
+        }
+    }
 }
